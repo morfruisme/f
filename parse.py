@@ -4,7 +4,7 @@ from pathlib import Path
 
 if __name__ == '__main__':
     src = './src'
-    dist = './dist'
+    dist = './docs'
 
     for path in Path(src).rglob('*.html'):
         with open(path, 'r', encoding='utf-8') as f:
