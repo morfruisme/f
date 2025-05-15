@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = require("./config");
+import { clientId } from './config';
 const api_url = 'https://api.spotify.com/v1/';
 const params = new URLSearchParams(location.search);
 if (!params.has('connected') || !localStorage.getItem('access_token') || !localStorage.getItem('refresh_token'))
@@ -16,7 +14,7 @@ const refreshToken = async () => {
         body: new URLSearchParams({
             grant_type: 'refresh_token',
             refresh_token: refresh,
-            client_id: config_1.clientId
+            client_id: clientId
         }).toString()
     };
     const url = 'https://accounts.spotify.com/api/token';
