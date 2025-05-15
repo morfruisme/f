@@ -1,4 +1,6 @@
-import { clientId, scope } from './config';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const config_1 = require("./config");
 const redirectUri = 'http://[::1]:3000/auth';
 const randomString = (length) => {
     const alnum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -24,11 +26,11 @@ const reqCode = async () => {
     const hashed = await sha256(codeVerifier);
     const codeChallenge = base64url(hashed);
     const params = {
-        client_id: clientId,
+        client_id: config_1.clientId,
         response_type: 'code',
         redirect_uri: redirectUri,
         state: state,
-        scope: scope,
+        scope: config_1.scope,
         code_challenge_method: 'S256',
         code_challenge: codeChallenge
     };
@@ -44,7 +46,7 @@ const reqToken = async (code) => {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-            client_id: clientId,
+            client_id: config_1.clientId,
             grant_type: 'authorization_code',
             code: code,
             redirect_uri: redirectUri,
