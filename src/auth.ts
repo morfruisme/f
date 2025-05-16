@@ -1,4 +1,4 @@
-import { clientId, scope } from './config';
+import { clientId, scope } from './config.js';
 
 const redirectUri = 'http://[::1]:3000/auth'
 

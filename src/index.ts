@@ -1,4 +1,4 @@
-import { clientId } from './config'
+import { clientId } from './config.js'
 
 const api_url = 'https://api.spotify.com/v1/'
 

@@ -1,4 +1,4 @@
-import { clientId } from './config';
+import { clientId } from './config.js';
 const api_url = 'https://api.spotify.com/v1/';
 const params = new URLSearchParams(location.search);
 if (!params.has('connected') || !localStorage.getItem('access_token') || !localStorage.getItem('refresh_token'))
