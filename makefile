@@ -8,3 +8,6 @@ debug:
 
 clean:
 	rm -rf ./docs/*
+
+push: build
+	git add . && git commit -m $(m) && git push
