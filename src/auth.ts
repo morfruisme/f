@@ -1,6 +1,6 @@
-import { clientId, scope } from './config.js';
+import { baseUrl, clientId, scope } from './config.js';
 
-const redirectUri = 'http://[::1]:3000/auth'
+const redirectUri = `${baseUrl}/auth`
 
 const randomString = (length: number) => {
     const alnum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
