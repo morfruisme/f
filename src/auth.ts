@@ -68,7 +68,7 @@ const reqToken = async (code: string) => {
 
     localStorage.setItem('access_token', data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
-    location.href = '/?connected'
+    location.href = `${baseUrl}/?connected`
 }
 
 const main = async () => {
