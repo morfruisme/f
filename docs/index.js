@@ -1,8 +1,8 @@
-import { clientId } from './config.js';
+import { baseUrl, clientId } from './config.js';
 const api_url = 'https://api.spotify.com/v1/';
 const params = new URLSearchParams(location.search);
 if (!params.has('connected') || !localStorage.getItem('access_token') || !localStorage.getItem('refresh_token'))
-    location.href = '/auth';
+    location.href = `${baseUrl}/auth`;
 let token = localStorage.getItem('access_token');
 let refresh = localStorage.getItem('refresh_token');
 const refreshToken = async () => {

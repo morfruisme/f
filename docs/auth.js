@@ -1,5 +1,5 @@
-import { clientId, scope } from './config.js';
-const redirectUri = 'http://[::1]:3000/auth';
+import { baseUrl, clientId, scope } from './config.js';
+const redirectUri = `${baseUrl}/auth`;
 const randomString = (length) => {
     const alnum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
