@@ -13,9 +13,7 @@ if (code && state && state == sessionStorage.getItem('state')) {
         await reqCode()
 }
 else if (refreshToken) {
-    alert("refresh")
     if (await reqRefreshToken(refreshToken)) {
-        alert("done")
         location.href = `${origin}/?connected`
     }
     else
