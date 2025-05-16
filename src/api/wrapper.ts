@@ -8,8 +8,6 @@ export namespace API {
     export const connect = async () => {
         const response = await call('/me')
 
-        alert(`${response.status}    ${_refreshToken}`)
-
         if (response.status == 200 || (_refreshToken && await reqRefreshToken(_refreshToken)))
             return
         await reqCode()
