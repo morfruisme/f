@@ -15,7 +15,13 @@ export var API;
         if (response.status != 200)
             return null;
         const data = await response.json();
-        return `${data.item.name} - ${data.item.artists[0].name}`;
+        return {
+            name: data.item.name,
+            artists: data.item.artists.map((a) => a.name),
+            album: data.item.album.name,
+            cover_art: data.item.album.images[0].url,
+            duration: data.item.duration_ms
+        };
     };
     const call = (endpoint) => {
         const payload = {

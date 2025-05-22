@@ -13,14 +13,27 @@ export namespace API {
         await reqCode()
     }
 
-    export const getPlayingTrack = async () => {
+    type Track = {
+        name: string,
+        artists: string[],
+        album: string,
+        cover_art: string,
+        duration: number
+    }
+
+    export const getPlayingTrack = async (): Promise<Track | null> => {
         const response = await call('/me/player/currently-playing')
         if (response.status != 200)
             return null
 
         const data = await response.json()
-        return `${data.item.name} - ${data.item.artists[0].name}`
-
+        return {
+            name: data.item.name,
+            artists: data.item.artists.map((a: any) => a.name),
+            album: data.item.album.name,
+            cover_art: data.item.album.images[0].url,
+            duration: data.item.duration_ms
+        }
     }
 
     const call = (endpoint: string) => {
