@@ -1,7 +1,7 @@
 all: build
 
 build:
-	tsc && python3 parse.py
+	tsc && python3 parse.py && cp ./src/*.css ./docs
 
 debug:
 	bun ./src/*.html
