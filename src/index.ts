@@ -1,19 +1,20 @@
-import { API } from './api/wrapper.js'
+import * as API from './api/main.js'
 
-API.connect()
+const timeMS= (t: number) =>
+    `${Math.floor(t/60_000)}:${Math.floor((t%60_000)/1_000).toString().padStart(2, '0')}`
 
 const setTrack = async () => {
-    const track = await API.getPlayingTrack()
+    const track = await API.playingTrack()
     if (!track)
         return
 
-    document.querySelector('#track p')!.textContent = track.name
-    document.querySelector('#album p')!.textContent = `${track.album} - ${track.artists.join(', ')}`
-    const img: HTMLImageElement = document.querySelector('#album img')!
-    img.src = track.cover_art
+    document.querySelector('#track')!.textContent = track.name
+    document.querySelector('#album')!.textContent = `${track.album} - ${track.artists.join(', ')}`
+    const img: HTMLImageElement = document.querySelector('#cover')!
+    img.src = track.cover
 
-    document.querySelector('#duration')!.textContent =
-        `${Math.floor(track.duration/60_000)}:${Math.floor((track.duration%60_000)/1_000).toString().padStart(2, '0')}`
+    document.querySelector('#duration')!.textContent = timeMS(track.duration)
+    document.querySelector('#progress')!.textContent = timeMS(track.progress)
 }
 
-setTrack()
+setInterval(setTrack, 500)

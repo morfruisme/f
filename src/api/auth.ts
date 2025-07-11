@@ -1,5 +1,6 @@
-import { origin, clientId, scope } from './config.js';
+import { clientId, scope } from './env.js';
 
+const origin = location.origin + (location.origin == 'http://[::1]:3000' ? '' : '/f')
 const redirectUri = `${origin}/auth`
 
 const randomString = (length: number) => {
@@ -88,4 +89,20 @@ export const reqRefreshToken = (refreshToken: string) => {
     })
 
     return reqToken(body)
+}
+
+export const connect = async (code: string | null = null, state: string | null = null) => {
+    if (code && state && state == sessionStorage.getItem('state')) {
+        if (await reqNewToken(code))
+            location.href = origin
+        else
+            await reqCode()
+    }
+    else {
+        const refreshToken = localStorage.getItem('refresh_token')
+        if (refreshToken && await reqRefreshToken(refreshToken))
+            location.href = origin
+        else
+            await reqCode()
+    }
 }

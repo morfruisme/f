@@ -6,26 +6,23 @@
     <title>Index</title>
 </head>
 <body>
-    <div id='player'>
-        <div id='album'>
-            <p>Artist - Album</p>
-            <img alt='Album cover' width='300' height='300'>
-        </div>
-        <div id='track'>
-            <p>Track</p>
-            <div id='progress_bar'>
-                <div id='current'>0:00</div>
-                <div id='bar'></div>
-                <div id='duration'>2:59</div>
-            </div>
-            <div id='control'>
-                <div id='prev'></div>
-                <div id='play'></div>
-                <div id='next'></div>
-            </div>
-        </div>
+  <div id='player'>
+    <div id=info>
+      <p id='album'>Album - Artist</p>
+      <p id='track'>Track</p>
     </div>
-
-    <script type='module' src='index.ts'></script>
+    <img id='cover' alt='Album cover' width='300' height='300'>
+    <div id='bar'></div>
+    <div id='time'>
+      <p id='progress'>0:00</p>
+      <p id='duration'>1:59</p>
+    </div>
+    <div id='controls'>
+      <div id='prev'></div>
+      <div id='play'></div>
+      <div id='next'></div>
+    </div>
+  </div>
+  <script type='module' src='index.ts'></script>
 </body>
 </html>
