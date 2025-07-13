@@ -1,7 +1,12 @@
-import { connect } from './api/auth'
+import { reqCode, connect } from './api/auth'
 
 const params = new URLSearchParams(location.search)
 const code = params.get('code')
 const state = params.get('state')
+const force = params.get('force') != null
 
-connect(code, state)
+// wether to force full auth (mainly to request a token with higher privileges)
+if (force)
+  reqCode()
+else
+  connect(code, state)

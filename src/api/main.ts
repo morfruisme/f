@@ -10,9 +10,9 @@ const ensureConnected = async () => {
         await connect()
 }
 
-const call = (endpoint: string) => {
+const call = (endpoint: string, method = 'GET') => {
     const payload = {
-        method: 'GET',
+        method,
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -37,6 +37,11 @@ export const playingTrack = async (): Promise<Track | null> => {
         duration: data.item.duration_ms,
     }
 }
+
+export const prev  = () => call('/me/player/previous', 'PUT')
+export const play  = () => call('/me/player/play'    , 'PUT')
+export const pause = () => call('/me/player/pause'   , 'PUT')
+export const next  = () => call('/me/player/next'    , 'PUT')
 
 await ensureConnected()
 console.log('Connected to the API !')

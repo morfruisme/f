@@ -67,7 +67,7 @@ const reqToken = async (body: URLSearchParams) => {
     return true
 }
 
-export const reqNewToken = (code: string) => {
+const reqNewToken = (code: string) => {
     const codeVerifier = sessionStorage.getItem('code_verifier')!
 
     const body = new URLSearchParams({
@@ -81,7 +81,7 @@ export const reqNewToken = (code: string) => {
     return reqToken(body)
 }
 
-export const reqRefreshToken = (refreshToken: string) => { 
+const reqRefreshToken = (refreshToken: string) => { 
     const body = new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: refreshToken,

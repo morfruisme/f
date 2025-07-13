@@ -17,4 +17,31 @@ const setTrack = async () => {
     document.querySelector('#progress')!.textContent = timeMS(track.progress)
 }
 
+const prev: HTMLButtonElement = document.querySelector('#prev')!
+prev.addEventListener('click', API.prev)
+
+let isPlaying = true;
+const togglePlay = () => {
+    isPlaying = !isPlaying
+
+    const play: HTMLElement = document.querySelector('#play use[href=\'#play_icon\']')!
+    const pause: HTMLElement = document.querySelector('#play use[href=\'#pause_icon\']')!
+        
+    if (isPlaying) {
+        play.style.display = 'none'
+        pause.style.display = ''
+        API.play()
+    }
+    else {
+        play.style.display = ''
+        pause.style.display = 'none'
+        API.pause()
+    }
+}
+const play: HTMLButtonElement = document.querySelector('#play')!
+play.addEventListener('click', togglePlay)
+
+const next: HTMLButtonElement = document.querySelector('#next')!
+next.addEventListener('click', API.next)
+
 setInterval(setTrack, 500)

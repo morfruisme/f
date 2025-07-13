@@ -1,28 +1,65 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset='utf-8'>
     <link rel='stylesheet' href='index.css'>
     <title>Index</title>
 </head>
+
 <body>
   <div id='player'>
     <div id=info>
       <p id='album'>Album - Artist</p>
       <p id='track'>Track</p>
     </div>
-    <img id='cover' alt='Album cover' width='300' height='300'>
+    <img id='cover' alt='Album cover' width='300' height='300'/>
+    
     <div id='bar'></div>
     <div id='time'>
       <p id='progress'>0:00</p>
       <p id='duration'>1:59</p>
     </div>
+    
     <div id='controls'>
-      <div id='prev'></div>
-      <div id='play'></div>
-      <div id='next'></div>
+      <button id='prev'>
+        <svg viewBox='0 0 10 10'>
+          <use href='#next_icon' transform='scale(-1, 1) translate(-10, 0)'/>
+        </svg>
+      </button>
+      <button id='play'>
+        <svg viewBox='0 0 10 10'>
+          <use href='#play_icon' style='display: none'/>
+          <use href='#pause_icon'/>
+        </svg>
+      </button>
+      <button id='next'>
+        <svg viewBox='0 0 10 10'>
+          <use href='#next_icon'/>
+        </svg>
+      </button>
     </div>
   </div>
+
+  <svg style='display: none;'>
+    <defs>
+      <polygon id='triangle' points='0,0 10,5 0,10' fill='black'/>
+      <line id='linev' x1='0' x2='0' y1='0' y2='10' stroke='black' stroke-width='2'/>
+
+      <use id='play_icon' href='#triangle'/>
+
+      <g id='pause_icon'>
+        <use href='#linev' transform='translate(3, 0)'/>
+        <use href='#linev' transform='translate(7, 0)'/>
+      </g>
+
+      <g id='next_icon'>
+        <use href='#triangle'/>
+        <use href='#linev' transform='translate(10, 0)'/>
+      </g>
+    </defs>
+  </svg>
   <script type='module' src='index.ts'></script>
 </body>
+
 </html>
