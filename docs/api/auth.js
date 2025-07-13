@@ -1,4 +1,5 @@
-import { origin, clientId, scope } from './config.js';
+import { clientId, scope } from './env.js';
+const origin = location.origin + (location.origin == 'http://[::1]:3000' ? '' : '/f');
 const redirectUri = `${origin}/auth`;
 const randomString = (length) => {
     const alnum = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -54,7 +55,7 @@ const reqToken = async (body) => {
         localStorage.setItem('refresh_token', data.refresh_token);
     return true;
 };
-export const reqNewToken = (code) => {
+const reqNewToken = (code) => {
     const codeVerifier = sessionStorage.getItem('code_verifier');
     const body = new URLSearchParams({
         client_id: clientId,
@@ -65,11 +66,26 @@ export const reqNewToken = (code) => {
     });
     return reqToken(body);
 };
-export const reqRefreshToken = (refreshToken) => {
+const reqRefreshToken = (refreshToken) => {
     const body = new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
         client_id: clientId
     });
     return reqToken(body);
+};
+export const connect = async (code = null, state = null) => {
+    if (code && state && state == sessionStorage.getItem('state')) {
+        if (await reqNewToken(code))
+            location.href = origin;
+        else
+            await reqCode();
+    }
+    else {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken && await reqRefreshToken(refreshToken))
+            location.href = origin;
+        else
+            await reqCode();
+    }
 };
