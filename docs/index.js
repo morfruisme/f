@@ -34,3 +34,18 @@ play.addEventListener('click', togglePlay);
 const next = document.querySelector('#next');
 next.addEventListener('click', API.next);
 setInterval(setTrack, 500);
+// gros slop
+const script = document.createElement('script');
+script.src = 'https://sdk.scdn.co/spotify-player.js';
+document.head.appendChild(script);
+window.onSpotifyWebPlaybackSDKReady = () => {
+    const player = new window.Spotify.Player({
+        name: 'f',
+        getOAuthToken: cb => { cb(API.token); },
+        volume: 0.5,
+    });
+    player.addListener('ready', ({ device_id }) => {
+        console.log('Ready with Device ID', device_id);
+    });
+    player.connect();
+};

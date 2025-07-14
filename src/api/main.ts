@@ -2,7 +2,7 @@ import { connect } from './auth.js'
 import { Track } from './types.js'
 
 const origin = 'https://api.spotify.com/v1'
-const token = localStorage.getItem('access_token')
+export const token = localStorage.getItem('access_token')!
 
 const ensureConnected = async () => {
     const response = await call('/me')
