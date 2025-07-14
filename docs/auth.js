@@ -1,4 +1,4 @@
-import { reqCode, connect } from './api/auth';
+import { reqCode, connect } from './api/auth.js';
 const params = new URLSearchParams(location.search);
 const code = params.get('code');
 const state = params.get('state');
