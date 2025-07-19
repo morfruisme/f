@@ -22,7 +22,7 @@ const call = (endpoint: string, method = 'GET') => {
     return fetch(url, payload)
 }
 
-export const playingTrack = async (): Promise<Track | null> => {
+export const current = async (): Promise<Track | null> => {
     const response = await call('/me/player/currently-playing')
     if (response.status != 200)
         return null
@@ -38,10 +38,26 @@ export const playingTrack = async (): Promise<Track | null> => {
     }
 }
 
-export const prev  = () => call('/me/player/previous', 'PUT')
-export const play  = () => call('/me/player/play'    , 'PUT')
-export const pause = () => call('/me/player/pause'   , 'PUT')
-export const next  = () => call('/me/player/next'    , 'PUT')
+export const play     = () => call('/me/player/play'    , 'PUT')
+export const pause    = () => call('/me/player/pause'   , 'PUT')
+export const previous = () => call('/me/player/previous', 'POST')
+export const next     = () => call('/me/player/next'    , 'POST')
+
+export const search = async (q: string)
+: Promise<{ name: string, artists: string[], id: string} | null> => {
+    const query = new URLSearchParams({ q, type: 'track', limit: '1' })
+    const response = await call(`/search?${query}`)
+    if (response.status != 200)
+        return null
+
+    const data = await response.json()
+    const track = data.tracks.items[0]
+    return {
+        name: track.name,
+        artists: track.artists.map((a: any) => a.name),
+        id: track.id,
+    }
+}
 
 await ensureConnected()
 console.log('Connected to the API !')

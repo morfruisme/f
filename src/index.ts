@@ -1,45 +1,58 @@
 import * as API from './api/main.js'
 
-const timeMS= (t: number) =>
+
+
+const displayMinutes = (t: number) =>
     `${Math.floor(t/60_000)}:${Math.floor((t%60_000)/1_000).toString().padStart(2, '0')}`
 
+const hide = (e: HTMLElement | SVGElement) =>
+    e.classList.add('hidden')
+const show = (e: HTMLElement | SVGElement) =>
+    e.classList.remove('hidden')
+
+
+
+const updateState = (state: any) => {
+    
+}
+
 const setTrack = async () => {
-    const track = await API.playingTrack()
-    if (!track)
-        return
+    const track = await API.current()
+    if (!track) return
 
     document.querySelector('#track')!.textContent = track.name
     document.querySelector('#album')!.textContent = `${track.album} - ${track.artists.join(', ')}`
     const img: HTMLImageElement = document.querySelector('#cover')!
     img.src = track.cover
 
-    document.querySelector('#duration')!.textContent = timeMS(track.duration)
-    document.querySelector('#progress')!.textContent = timeMS(track.progress)
+    document.querySelector('#duration')!.textContent = displayMinutes(track.duration)
+    document.querySelector('#progress')!.textContent = displayMinutes(track.progress)
 }
 
-const prev: HTMLButtonElement = document.querySelector('#prev')!
-prev.addEventListener('click', API.prev)
+
 
 let isPlaying = true;
-const togglePlay = () => {
-    isPlaying = !isPlaying
+const playIcon: HTMLElement = document.querySelector('#play use[href=\'#play_icon\']')!
+const pauseIcon: HTMLElement = document.querySelector('#play use[href=\'#pause_icon\']')!
 
-    const play: HTMLElement = document.querySelector('#play use[href=\'#play_icon\']')!
-    const pause: HTMLElement = document.querySelector('#play use[href=\'#pause_icon\']')!
-        
+const play: HTMLButtonElement = document.querySelector('#play')!
+play.addEventListener('click', () => {
+    isPlaying = !isPlaying
+    
     if (isPlaying) {
-        play.style.display = 'none'
-        pause.style.display = ''
+        show(playIcon)
+        hide(pauseIcon)
         API.play()
     }
     else {
-        play.style.display = ''
-        pause.style.display = 'none'
+        hide(playIcon)
+        show(pauseIcon)
         API.pause()
     }
-}
-const play: HTMLButtonElement = document.querySelector('#play')!
-play.addEventListener('click', togglePlay)
+})
+
+const prev: HTMLButtonElement = document.querySelector('#prev')!
+prev.addEventListener('click', API.previous)
 
 const next: HTMLButtonElement = document.querySelector('#next')!
 next.addEventListener('click', API.next)
@@ -47,24 +60,3 @@ next.addEventListener('click', API.next)
 
 
 setInterval(setTrack, 500)
-
-
-
-// gros slop
-const script = document.createElement('script')
-script.src = 'https://sdk.scdn.co/spotify-player.js'
-document.head.appendChild(script)
-
-window.onSpotifyWebPlaybackSDKReady = () => {
-    const player = new window.Spotify.Player({
-        name: 'f',
-        getOAuthToken: cb => { cb(API.token); },
-        volume: 0.5,
-    })
-
-    player.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID', device_id);
-    })
-
-    player.connect()
-}
