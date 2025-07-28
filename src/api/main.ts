@@ -1,5 +1,5 @@
 import { connect } from './auth.js'
-import { Track } from './types.js'
+import { SimpleTrack, Track, PlayingTrack } from './types.js'
 
 const origin = 'https://api.spotify.com/v1'
 export const token = localStorage.getItem('access_token')!
@@ -22,19 +22,20 @@ const call = (endpoint: string, method = 'GET') => {
     return fetch(url, payload)
 }
 
-export const current = async (): Promise<Track | null> => {
+export const current = async (): Promise<PlayingTrack | null> => {
     const response = await call('/me/player/currently-playing')
     if (response.status != 200)
         return null
 
     const data = await response.json()
     return {
+        id: data.item.id,
         name: data.item.name,
         artists: data.item.artists.map((a: any) => a.name),
         album: data.item.album.name,
         cover: data.item.album.images[0].url,
-        progress: data.progress_ms,
-        duration: data.item.duration_ms,
+        duration_ms: data.item.duration_ms,
+        progress_ms: data.progress_ms,
     }
 }
 
@@ -43,20 +44,19 @@ export const pause    = () => call('/me/player/pause'   , 'PUT')
 export const previous = () => call('/me/player/previous', 'POST')
 export const next     = () => call('/me/player/next'    , 'POST')
 
-export const search = async (q: string)
-: Promise<{ name: string, artists: string[], id: string} | null> => {
-    const query = new URLSearchParams({ q, type: 'track', limit: '1' })
+export const search = async (q: string, limit: number): Promise<SimpleTrack[]> => {
+    const query = new URLSearchParams({ q, type: 'track', limit: `${limit}` })
     const response = await call(`/search?${query}`)
     if (response.status != 200)
-        return null
+        return []
 
     const data = await response.json()
-    const track = data.tracks.items[0]
-    return {
+    const tracks = data.tracks.items
+    return tracks.map((track: any) => ({
+        id: track.id,
         name: track.name,
         artists: track.artists.map((a: any) => a.name),
-        id: track.id,
-    }
+    }))
 }
 
 await ensureConnected()
