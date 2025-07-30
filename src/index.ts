@@ -17,16 +17,19 @@ const updateState = (state: any) => {
 }
 
 const setTrack = async () => {
-    const track = await API.current()
+    const state = await API.state()
+    if (!state) return
+    const track = state.item
     if (!track) return
 
     document.querySelector('#track')!.textContent = track.name
-    document.querySelector('#album')!.textContent = `${track.album} - ${track.artists.join(', ')}`
+    document.querySelector('#album')!.textContent =
+        `${track.album.name} - ${track.artists.map(a => a.name).join(', ')}`
     const img: HTMLImageElement = document.querySelector('#cover')!
-    img.src = track.cover
+    img.src = track.album.images[0].url
 
-    document.querySelector('#duration')!.textContent = displayMinutes(track.duration)
-    document.querySelector('#progress')!.textContent = displayMinutes(track.progress)
+    document.querySelector('#duration')!.textContent = displayMinutes(track.duration_ms)
+    document.querySelector('#progress')!.textContent = displayMinutes(state.progress_ms)
 }
 
 

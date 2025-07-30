@@ -1,62 +1,45 @@
 import { connect } from './auth.js'
-import { SimpleTrack, Track, PlayingTrack } from './types.js'
+import { Track, PlaybackState } from './types.js'
 
 const origin = 'https://api.spotify.com/v1'
 export const token = localStorage.getItem('access_token')!
 
 const ensureConnected = async () => {
-    const response = await call('/me')
-    if (response.status != 200)
+    const res = await get('/me')
+    console.log(res)
+    if (res === null) {
         await connect()
+    }
 }
 
-const call = (endpoint: string, method = 'GET') => {
+const call = (method: "GET" | "PUT" | "POST", endpoint: string) => {
     const payload = {
         method,
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
     }
-
     const url = `${origin}${endpoint}`
     return fetch(url, payload)
 }
 
-export const current = async (): Promise<PlayingTrack | null> => {
-    const response = await call('/me/player/currently-playing')
-    if (response.status != 200)
-        return null
+const get = async <T>(endpoint: string): Promise<T | null> =>
+    call("GET", endpoint).then(response => response.ok ? response.json() : null)
 
-    const data = await response.json()
-    return {
-        id: data.item.id,
-        name: data.item.name,
-        artists: data.item.artists.map((a: any) => a.name),
-        album: data.item.album.name,
-        cover: data.item.album.images[0].url,
-        duration_ms: data.item.duration_ms,
-        progress_ms: data.progress_ms,
-    }
-}
+const put  = (endpoint: string) =>
+    call("PUT",  endpoint).then(response => response.ok)
 
-export const play     = () => call('/me/player/play'    , 'PUT')
-export const pause    = () => call('/me/player/pause'   , 'PUT')
-export const previous = () => call('/me/player/previous', 'POST')
-export const next     = () => call('/me/player/next'    , 'POST')
+const post = (endpoint: string) =>
+    call("POST", endpoint).then(response => response.ok)
 
-export const search = async (q: string, limit: number): Promise<SimpleTrack[]> => {
+export const state = async () => get<PlaybackState>('/me/player/currently-playing')
+export const play     = () => put("/me/player/play")
+export const pause    = () => put("/me/player/pause")
+export const previous = () => post("/me/player/previous")
+export const next     = () => post("/me/player/next")
+
+export const search = async (q: string, limit: number): Promise<Track[]> => {
     const query = new URLSearchParams({ q, type: 'track', limit: `${limit}` })
-    const response = await call(`/search?${query}`)
-    if (response.status != 200)
-        return []
-
-    const data = await response.json()
-    const tracks = data.tracks.items
-    return tracks.map((track: any) => ({
-        id: track.id,
-        name: track.name,
-        artists: track.artists.map((a: any) => a.name),
-    }))
+    const tracks = await get<Track[]>(`/search?${query}`)
+    return tracks ? tracks : []
 }
 
 await ensureConnected()
