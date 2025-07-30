@@ -1,12 +1,6 @@
+
+
 import { SimpleTrack } from './types.js'
-
-export type Track = SimpleTrack & {
-  tags: Tag[],
-}
-
-export type Tag = {
-  name: string,
-}
 
 // export class Node {
 //   tag:    Tag | null = null

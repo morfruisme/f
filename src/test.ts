@@ -1,6 +1,5 @@
 import { search } from './api/main.js'
-import { Tag } from './api/tag.js'
-import { SimpleTrack, TagTree } from './api/types.js'
+import { SimpleTrack, Tag, TrackTree } from './api/types.js'
 
 const searchInput = document.querySelector('#search')! as HTMLInputElement
 const searchResult = document.querySelector('#result')!
@@ -11,7 +10,7 @@ const tagMenu: HTMLDivElement = document.querySelector('#tag-dialog')!
 const tagInput: HTMLInputElement = document.querySelector('#tag-dialog > input')!
 
 let selectedTrack: SimpleTrack | null = null
-const tree = new TagTree()
+const tree = new TrackTree()
 treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
 
 searchInput.addEventListener('keypress', async e => {
@@ -75,7 +74,7 @@ tagInput.addEventListener('keypress', e => {
     const tag = { name: tagInput.value.trim() }
     tagInput.value = ''
     createTagP(tag)
-    tree.addTrack(selectedTrack!, [tag])
+    tree.add(selectedTrack!, [tag])
     treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
   }
 })
@@ -84,7 +83,7 @@ const createTagP = (tag: Tag) => {
   const p = document.createElement('p')
   p.textContent = tag.name
   p.addEventListener('click', _ => {
-    tree.addTrack( selectedTrack!, [tag])
+    tree.add(selectedTrack!, [tag])
     treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
   })
   tagMenu.appendChild(p)
