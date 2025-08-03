@@ -1,107 +1,72 @@
-type Node<I, L> = Inner<I, L> | Leaf<I, L>
+type Node = Inner | Leaf
 
-class Leaf<I, L> {
-  items: I[]
-  parent: Inner<I, L> | null = null
+class Leaf {
+  items: string[]
+  parent: Inner | null = null
 
-  constructor(items: I[] = []) {
+  constructor(items: string[] = []) {
     this.items = items
   }
 }
 
-class Inner<I, L> {
-  label: L
-  left: Node<I, L>
-  right: Node<I, L>
-  parent: Inner<I, L> | null = null
+class Inner {
+  label: string
+  left:  Node
+  right: Node
+  parent: Inner | null = null
 
-  constructor(label: L, left: Node<I, L>, right: Node<I, L>) {
+  constructor(label: string, left: Node, right: Node) {
     this.label = label
     this.left = left
-    this.left.parent = this
     this.right = right
+    this.left.parent = this
     this.right.parent = this
   }
 }
 
-type Id<T> = (x: T) => string
+type Item<I, L> = {
+  id: string
+  labels: Label<L>[]
+  value: I
+}
+
+type Label<L> = {
+  id: string
+  value: L
+}
 
 export class Tree<I, L> {
-  private root: Node<I, L> = new Leaf()
-  private items: Map<string, Leaf<I, L>> = new Map()
-  
-  private iId: Id<I>
-  private lId: Id<L>
-  
-  constructor(itemId: Id<I>, labelId: Id<L>) {
-    this.iId = itemId
-    this.lId = labelId
-  }
+  private root: Node = new Leaf() 
+  protected items = new Map<string, Item<I, L>>()
+  protected labels = new Map<string, Label<L>>()
 
-  labels(leaf: Leaf<I, L>) {    
-    if (!leaf.parent)
-      return []
-
-    const labels: L[] = []
-    if (leaf.parent.left === leaf)
-      labels.push(leaf.parent.label)
-    
-    let c = leaf.parent
-    while (c.parent !== null) {
-      if (c.parent.left === c)
-        labels.push(c.parent.label)
-      c = c.parent
-    }
-  
-    return labels
-  }
-
-  has(item: I) {
-    return this.items.has(this.iId(item))
-  }
-
-  remove(item: I) {
-    if (this.has(item)) {
-      const leaf = this.items.get(this.iId(item))!
-      const i = leaf.items.findIndex(i => this.iId(i) === this.iId(item))
-      leaf.items.splice(i, 1)
-      return this.labels(leaf)
-    }
-    return []
-  }
-  
-  add(item: I, labels: L[]) {
-    labels.push(...this.remove(item))
+  protected add(item: Item<I, L>) {
+    this.remove(item.id)
+    this.items.set(item.id, item)
+ 
     const seen: string[] = []
-    
-    const f = (node: Node<I, L>) => {
+    const f = (node: Node) => {
       if (node instanceof Inner) {
-        if (labels.some(l => this.lId(l) === this.lId(node.label))) {
-          seen.push(this.lId(node.label))
+        if (item.labels.some(l => l.id === node.label)) {
+          seen.push(node.label)
           f(node.left)
         }
         else
           f(node.right)
       }
       else {
-        const newLabels = labels.filter(l => {
-          const b = !seen.includes(this.lId(l))
-          seen.push(this.lId(l))
-          return b
-        })
+        const newLabels = item.labels.filter(l => !seen.includes(l.id))
+        newLabels.forEach(l => this.labels.set(l.id, l))
 
-        if (newLabels.length === 0) {
-          node.items.push(item)
-          this.items.set(this.iId(item), node)
-        }
+        if (newLabels.length === 0)
+          node.items.push(item.id)
         else {
           const parent = node.parent
-          let leaf: Leaf<I, L> = new Leaf([item])
-          this.items.set(this.iId(item), leaf)
+          let leaf = new Leaf([item.id])
           
-          let c = new Inner(newLabels[0], leaf, node)         
-          for (let i = newLabels.length-1; i > 0; i--)
-            c = new Inner(newLabels[i], c, new Leaf())
+          let c = new Inner(newLabels[0].id, leaf, node)
+          for (let i = 1; i < newLabels.length; i++)
+            c = new Inner(newLabels[i].id, c, new Leaf())
 
           if (parent) {
             if (parent.left === node)
@@ -115,23 +80,75 @@ export class Tree<I, L> {
         }
       }
     }
-
+    
     f(this.root)
   }
-  
-  toString() {
-    let output = ''
 
-    const f = (node: Node<I, L>, acc: string) => {
+  search(labels: string[]) {
+    const items: I[] = []
+    const seen = labels.map(_ => false)
+    
+    const f = (node: Node) => {
+      if (node instanceof Leaf) {
+        if (seen.every(b => b))
+          items.push(...node.items.map(i => this.items.get(i)!.value))
+      }
+      else {
+        const i = labels.indexOf(node.label)
+        if (i === -1)
+          f(node.right)
+        else
+          seen[i] = true  
+        f(node.left) 
+      }
+    }
+
+    f(this.root)
+    return items
+  }
+
+  private findLeaf(labels: string[]) {
+    const seen = labels.map(_ => false)
+
+    const f = (node: Node) => {
+      if (node instanceof Leaf)
+        return seen.every(b => b) ? node : null
+      const i = labels.indexOf(node.label)
+      if (i !== -1) {
+        seen[i] = true
+        return f(node.left)
+      }
+      return f(node.right)
+    }
+
+    return f(this.root)
+  }
+
+  protected find(labels: string[]) {
+    const leaf = this.findLeaf(labels)
+    return leaf ? leaf.items : []
+  }
+
+  protected remove(item: string) {
+    if (this.items.has(item)) {
+      const leaf = this.findLeaf(this.items.get(item)!.labels.map(l => l.id))!
+      leaf.items.splice(leaf.items.indexOf(item), 1)
+    }
+  }
+
+  toString() {
+    let output = ""
+
+    const f = (node: Node, acc: string) => {
       if (node instanceof Inner) {
-        f(node.left, `${acc}${this.lId(node.label)} `)
+        f(node.left, `${acc}${node.label} `)
         f(node.right, acc)
       }
       else
-        output += `${acc}[ ${node.items.map(this.iId).join(', ')} ]\n`
+        output += `${acc}[ ${node.items.join(", ")} ]\n`
     }
 
-    f(this.root, '')
+    f(this.root, "")
     return output
   }
 }

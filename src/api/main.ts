@@ -6,10 +6,8 @@ export const token = localStorage.getItem('access_token')!
 
 const ensureConnected = async () => {
     const res = await get('/me')
-    console.log(res)
-    if (res === null) {
+    if (res === null)
         await connect()
-    }
 }
 
 const call = (method: "GET" | "PUT" | "POST", endpoint: string) => {
@@ -22,7 +20,7 @@ const call = (method: "GET" | "PUT" | "POST", endpoint: string) => {
 }
 
 const get = async <T>(endpoint: string): Promise<T | null> =>
-    call("GET", endpoint).then(response => response.ok ? response.json() : null)
+    call("GET", endpoint).then(response => response.status === 200 ? response.json() : null)
 
 const put  = (endpoint: string) =>
     call("PUT",  endpoint).then(response => response.ok)
@@ -30,7 +28,7 @@ const put  = (endpoint: string) =>
 const post = (endpoint: string) =>
     call("POST", endpoint).then(response => response.ok)
 
-export const state = async () => get<PlaybackState>('/me/player/currently-playing')
+export const state = async () => get<PlaybackState>('/me/player')
 export const play     = () => put("/me/player/play")
 export const pause    = () => put("/me/player/pause")
 export const previous = () => post("/me/player/previous")
@@ -38,8 +36,8 @@ export const next     = () => post("/me/player/next")
 
 export const search = async (q: string, limit: number): Promise<Track[]> => {
     const query = new URLSearchParams({ q, type: 'track', limit: `${limit}` })
-    const tracks = await get<Track[]>(`/search?${query}`)
-    return tracks ? tracks : []
+    const data = await get<{tracks: { items: Track[] }}>(`/search?${query}`)
+    return data ? data.tracks.items : []
 }
 
 await ensureConnected()

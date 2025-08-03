@@ -1,51 +1,39 @@
-import * as API from './api/main.js';
-const timeMS = (t) => `${Math.floor(t / 60_000)}:${Math.floor((t % 60_000) / 1_000).toString().padStart(2, '0')}`;
+import * as API from "./api/main.js";
+const displayMinutes = (t) => `${Math.floor(t / 60_000)}:${Math.floor((t % 60_000) / 1_000).toString().padStart(2, "0")}`;
+const hide = (e) => e.classList.add("hidden");
+const show = (e) => e.classList.remove("hidden");
 const setTrack = async () => {
-    const track = await API.playingTrack();
-    if (!track)
+    const state = await API.state();
+    if (!state || !state.is_playing)
         return;
-    document.querySelector('#track').textContent = track.name;
-    document.querySelector('#album').textContent = `${track.album} - ${track.artists.join(', ')}`;
-    const img = document.querySelector('#cover');
-    img.src = track.cover;
-    document.querySelector('#duration').textContent = timeMS(track.duration);
-    document.querySelector('#progress').textContent = timeMS(track.progress);
+    const track = state.item;
+    document.querySelector("#track").textContent = track.name;
+    document.querySelector("#album").textContent =
+        `${track.album.name} - ${track.artists.map(a => a.name).join(", ")}`;
+    const img = document.querySelector("#cover");
+    img.src = track.album.images[0].url;
+    document.querySelector("#duration").textContent = displayMinutes(track.duration_ms);
+    document.querySelector("#progress").textContent = displayMinutes(state.progress_ms);
 };
-const prev = document.querySelector('#prev');
-prev.addEventListener('click', API.prev);
+const playIcon = document.querySelector("#play use[href='#play_icon']");
+const pauseIcon = document.querySelector("#play use[href='#pause_icon']");
 let isPlaying = true;
-const togglePlay = () => {
+const play = document.querySelector("#play");
+play.addEventListener("click", () => {
     isPlaying = !isPlaying;
-    const play = document.querySelector('#play use[href=\'#play_icon\']');
-    const pause = document.querySelector('#play use[href=\'#pause_icon\']');
     if (isPlaying) {
-        play.style.display = 'none';
-        pause.style.display = '';
+        hide(playIcon);
+        show(pauseIcon);
         API.play();
     }
     else {
-        play.style.display = '';
-        pause.style.display = 'none';
+        show(playIcon);
+        hide(pauseIcon);
         API.pause();
     }
-};
-const play = document.querySelector('#play');
-play.addEventListener('click', togglePlay);
+});
+const prev = document.querySelector('#prev');
+prev.addEventListener('click', API.previous);
 const next = document.querySelector('#next');
 next.addEventListener('click', API.next);
 setInterval(setTrack, 500);
-// gros slop
-const script = document.createElement('script');
-script.src = 'https://sdk.scdn.co/spotify-player.js';
-document.head.appendChild(script);
-window.onSpotifyWebPlaybackSDKReady = () => {
-    const player = new window.Spotify.Player({
-        name: 'f',
-        getOAuthToken: cb => { cb(API.token); },
-        volume: 0.5,
-    });
-    player.addListener('ready', ({ device_id }) => {
-        console.log('Ready with Device ID', device_id);
-    });
-    player.connect();
-};

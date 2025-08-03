@@ -1,63 +1,105 @@
-import { search } from './api/main.js'
-import { SimpleTrack, Tag, TrackTree } from './api/types.js'
+import { search } from "./api/main.js"
+import { Track, Label, Tree } from "./api/types.js"
 
-const searchInput = document.querySelector('#search')! as HTMLInputElement
-const searchResult = document.querySelector('#result')!
+const searchInput: HTMLInputElement = document.querySelector("#search-input")!
+const searchResult = document.querySelector("#search-result")!
+let selectedTrack: Track | null = null
 
-const treeP = document.querySelector('#tree')!
-
-const tagMenu: HTMLDivElement = document.querySelector('#tag-dialog')!
-const tagInput: HTMLInputElement = document.querySelector('#tag-dialog > input')!
-
-let selectedTrack: SimpleTrack | null = null
-const tree = new TrackTree()
-treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
-
-searchInput.addEventListener('keypress', async e => {
-  if (e.key === 'Enter') {
+searchInput.addEventListener("keypress", async e => {
+  if (e.key === "Enter") {
     [...searchResult.childNodes].forEach(child => child.remove())
-    search(searchInput.value, 5).then(track => track.forEach(createTrackResult))
+    search(searchInput.value.trim(), 5).then(track => track.forEach(addTrackResult))
   }
 })
 
-const createTrackResult = (track: SimpleTrack) => {
-  const p = document.createElement('p')
-  p.textContent = `${track.name} - ${track.artists.join(', ')}`
-  p.addEventListener('click', e => {
+const addTrackResult = (track: Track) => {
+  const p = document.createElement("p")
+  p.textContent = `${track.name} - ${track.artists.map(a => a.name).join(", ")}`
+  p.addEventListener("click", e => {
     selectedTrack = track
-    moveTagDialog(e.x, e.y)
+    moveLabelMenu(e.x, e.y)
   })
   searchResult.appendChild(p)
 }
 
-const moveTagDialog = (x: number, y: number) => {  
-  tagMenu.style.display = 'block'
-  tagMenu.style.left = `${x}px`
-  tagMenu.style.top = `${y}px`
+const treeP = document.querySelector("#tree")!
+const updateTreeP = (tree: Tree) => treeP.innerHTML = tree.toString().replace(/\n/g, "<br>")
+const tree = new Tree()
+updateTreeP(tree)
 
-  tagInput.value = ''
-  tagInput.focus()
+const labelSearch: HTMLInputElement = document.querySelector("#label-search")!
+const labelResult = document.querySelector("#label-result")!
 
-  const f = (e: Event) => {
+labelSearch.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    const tracks = tree.search(labelSearch.value.split("&").map(l => l.trim()))
+    labelResult.textContent = `[ ${tracks.map(t => t.name).join(", ")} ]`
+  }
+})
+
+const labelMenu: HTMLDivElement = document.querySelector("#label-menu")!
+const labelInput: HTMLInputElement = document.querySelector("#label-menu > input")!
+
+labelInput.addEventListener("keypress", e => {
+  if (e.key === "Enter" && labelInput.value.trim() !== "") {
+    const label = { name: labelInput.value.trim() }
+    labelInput.value = ""
+    addLabelOption(label)
+    tree.addLabels(selectedTrack!, [label])
+    updateTreeP(tree)
+  }
+})
+
+const addLabelOption = (label: Label) => {
+  const div = document.createElement("div")
+  div.style.backgroundColor = randomHSLColor()
+
+  const p = document.createElement("p")
+  p.textContent = label.name
+  p.classList.add("option")
+  p.addEventListener("click", () => {
+    tree.addLabels(selectedTrack!, [label])
+    updateTreeP(tree)
+  })
+
+  const x = document.createElement("p")
+  x.textContent = "X"
+  x.classList.add("x")
+  x.addEventListener("click", () => {
+    tree.removeLabels(selectedTrack!, [label])
+    updateTreeP(tree)
+  })
+
+  div.appendChild(p)
+  div.appendChild(x)
+  labelMenu.appendChild(div)
+}
+
+const moveLabelMenu = (x: number, y: number) => {  
+  labelMenu.style.display = "block"
+  labelMenu.style.left = `${x}px`
+  labelMenu.style.top = `${y}px`
+
+  labelInput.value = ""
+  labelInput.focus()
+
+  triggerOnce("click", e => {
     const target = e.target! as Element
     if ((target === searchResult || !searchResult.contains(target))
-    && !tagMenu.contains(target)) {
-      tagMenu.style.display = 'none'
+    && !labelMenu.contains(target)) {
+      labelMenu.style.display = "none"
       return true
     }
     return false
-  }
+  })
 
-  const g = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      tagMenu.style.display = 'none'
+  triggerOnce("keydown", e => {
+    if (e.key === "Escape") {
+      labelMenu.style.display = "none"
       return true
     }
     return false
-  }
-  
-  triggerOnce('click', f)
-  triggerOnce('keydown', g)
+  })
 }
 
 const triggerOnce = <K extends keyof DocumentEventMap, E = DocumentEventMap[K]>
@@ -69,22 +111,7 @@ const triggerOnce = <K extends keyof DocumentEventMap, E = DocumentEventMap[K]>
   document.addEventListener(type, f)
 }
 
-tagInput.addEventListener('keypress', e => {
-  if (e.key === 'Enter' && tagInput.value.trim() !== '') {
-    const tag = { name: tagInput.value.trim() }
-    tagInput.value = ''
-    createTagP(tag)
-    tree.add(selectedTrack!, [tag])
-    treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
-  }
-})
+const randomHSLColor = () =>
+  `hsl(${360 * Math.random()}, ${100 * Math.random()}%, ${60 + 40 * Math.random()}%)`
 
-const createTagP = (tag: Tag) => {
-  const p = document.createElement('p')
-  p.textContent = tag.name
-  p.addEventListener('click', _ => {
-    tree.add(selectedTrack!, [tag])
-    treeP.innerHTML = tree.toString().replace(/\n/g, '<br>')
-  })
-  tagMenu.appendChild(p)
-}
+addLabelOption({ name: "test" })
