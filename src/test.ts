@@ -1,5 +1,5 @@
-import { search } from "./api/main.js"
-import { Track, Label, Tree } from "./api/types.js"
+import { search, getTrack, addLabels, removeLabels, displayTree, searchTracks } from "./api/main.js"
+import { Track, Label } from "./api/types.js"
 
 const searchInput: HTMLInputElement = document.querySelector("#search-input")!
 const searchResult = document.querySelector("#search-result")!
@@ -8,13 +8,14 @@ let selectedTrack: Track | null = null
 searchInput.addEventListener("keypress", async e => {
   if (e.key === "Enter") {
     [...searchResult.childNodes].forEach(child => child.remove())
-    search(searchInput.value.trim(), 5).then(track => track.forEach(addTrackResult))
+    search(searchInput.value.trim(), 5)
+      .then(tracks => tracks.forEach(t => addTrackResult(getTrack(t))))
   }
 })
 
 const addTrackResult = (track: Track) => {
   const p = document.createElement("p")
-  p.textContent = `${track.name} - ${track.artists.map(a => a.name).join(", ")}`
+  p.textContent = track.toString()
   p.addEventListener("click", e => {
     selectedTrack = track
     moveLabelMenu(e.x, e.y)
@@ -23,17 +24,18 @@ const addTrackResult = (track: Track) => {
 }
 
 const treeP = document.querySelector("#tree")!
-const updateTreeP = (tree: Tree) => treeP.innerHTML = tree.toString().replace(/\n/g, "<br>")
-const tree = new Tree()
-updateTreeP(tree)
+const updateTreeP = () => treeP.innerHTML = displayTree().replace(/\n/g, "<br>")
+
+updateTreeP()
 
 const labelSearch: HTMLInputElement = document.querySelector("#label-search")!
 const labelResult = document.querySelector("#label-result")!
 
 labelSearch.addEventListener("keypress", e => {
   if (e.key === "Enter") {
-    const tracks = tree.search(labelSearch.value.split("&").map(l => l.trim()))
-    labelResult.textContent = `[ ${tracks.map(t => t.name).join(", ")} ]`
+    const tracks = searchTracks(labelSearch.value.split("&")
+      .map(l => new Label(l.trim())))
+    labelResult.textContent = `[ ${tracks.join(", ")} ]`
   }
 })
 
@@ -42,11 +44,12 @@ const labelInput: HTMLInputElement = document.querySelector("#label-menu > input
 
 labelInput.addEventListener("keypress", e => {
   if (e.key === "Enter" && labelInput.value.trim() !== "") {
-    const label = { name: labelInput.value.trim() }
+    const label = new Label(labelInput.value.trim())
     labelInput.value = ""
     addLabelOption(label)
-    tree.addLabels(selectedTrack!, [label])
-    updateTreeP(tree)
+    selectedTrack!.labels.push(label)
+    // tree.add(selectedTrack!)
+    updateTreeP()
   }
 })
 
@@ -58,16 +61,17 @@ const addLabelOption = (label: Label) => {
   p.textContent = label.name
   p.classList.add("option")
   p.addEventListener("click", () => {
-    tree.addLabels(selectedTrack!, [label])
-    updateTreeP(tree)
+    selectedTrack!.labels.push(label)
+    // tree.add(selectedTrack!)
+    updateTreeP()
   })
 
   const x = document.createElement("p")
   x.textContent = "X"
   x.classList.add("x")
   x.addEventListener("click", () => {
-    tree.removeLabels(selectedTrack!, [label])
-    updateTreeP(tree)
+    // todo tree.removeLabels(selectedTrack!, [label])
+    updateTreeP()
   })
 
   div.appendChild(p)
@@ -113,5 +117,3 @@ const triggerOnce = <K extends keyof DocumentEventMap, E = DocumentEventMap[K]>
 
 const randomHSLColor = () =>
   `hsl(${360 * Math.random()}, ${100 * Math.random()}%, ${60 + 40 * Math.random()}%)`
-
-addLabelOption({ name: "test" })

@@ -1,3 +1,8 @@
+:root {
+  --base:#efe5d5;
+  --highlight: #d6c3a4;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -5,7 +10,7 @@ body {
 
   height: 100vh;
   margin: 0;
-  background-color: #efe5d5;
+  background-color: var(--base);
   font-family: sans-serif;
 }
 

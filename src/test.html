@@ -3,24 +3,25 @@
 
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href='test.css'>
+  <link rel="stylesheet" href="test.css">
   <title>Test</title>
-  <script type="module" src='test.ts' defer></script>
+  <script type="module" src="test_new.ts" defer></script>
 </head>
 
 <body>
-  <label>Search track :</label>
-  <input id="search-input"></input>
-  <div id="search-result"></div>
-  <p id="tree"></p>
-
-  <label>Search by label :</label>
-  <input id="label-search"></input>
-  <p id="label-result">[]</p>
-  
-  <div id="label-menu">
-    <input></input>
+  <div id="search">
+    <div class="input">
+      <input/>
+    </div>
+    <div class="result"></div>
   </div>
+
+  <template id="track-template">
+    <div class="track">
+      <p></p>
+      <div class="labels"></div>
+    </div>
+  </template>
 </body>
 
 </html>
