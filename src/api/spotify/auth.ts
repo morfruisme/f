@@ -1,3 +1,5 @@
+export { reqCode, connect }
+
 const clientId = "abebe5729c954536bb91934e5aaaa9b5"
 const scope = "streaming user-read-playback-state user-modify-playback-state user-read currently-playing"
 
@@ -23,7 +25,7 @@ const base64url = (buff: ArrayBuffer) => {
     .replace(/\//g, "_")
 }
 
-export const reqCode = async () => {
+const reqCode = async () => {
   const state = randomString(16)
   sessionStorage.setItem("state", state)
 
@@ -92,7 +94,7 @@ const reqRefreshToken = (refreshToken: string) => {
   return reqToken(body)
 }
 
-export const connect = async (code: string | null = null, state: string | null = null) => {
+const connect = async (code: string | null = null, state: string | null = null) => {
   if (code && state && state == sessionStorage.getItem("state")) {
     if (await reqNewToken(code))
       location.href = origin

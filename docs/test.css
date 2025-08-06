@@ -1,5 +1,22 @@
 :root {  
-  --color: lightgray;
+  --base: #efe5d5;
+  --highlight: #d6c3a4;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: 100vh;
+  margin: 0;
+  background-color: var(--base);
+  font-family: sans-serif;
+}
+
+#search {
+  position: absolute;
+  top: 0;
 }
 
 #search-result {
