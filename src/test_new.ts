@@ -17,10 +17,3 @@ const addAlbumResult = (album: Album) => {
   p.textContent = album.toString()
   searchResult.appendChild(p)
 }
-
-Album.search("jane remover")
-  .then(albums => {
-    const a = albums
-      .find(a => a.name.toLowerCase() === "revengeseekerz")!
-    a.addLabels([new Label("jane"), new Label("jane")])
-  })
